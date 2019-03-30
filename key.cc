@@ -4,7 +4,6 @@
 #include <ctime>
 #include <cstdlib>
 #include <cassert>
-#include <iostream>
 
 static secp256k1_context *secp256k1_context_sign = secp256k1_context_create(SECP256K1_CONTEXT_SIGN);
 
@@ -91,9 +90,5 @@ bool CKey::verify_pubkey(const CPubKey &pubkey) const
 	uint256 hash = sha256(str);
 	std::vector<unsigned char> sig;
 	sign(hash, sig);
-	std::cout << "msg hash:";
-	std::cout << hash.get_hex() << std::endl;
-	std::cout << "sig:";
-	std::cout << hex_str(sig.begin(), sig.end()) << std::endl;
 	return pubkey.verify(hash, sig);
 }
