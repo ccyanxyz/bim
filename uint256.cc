@@ -16,7 +16,14 @@ template <uint32_t BITS>
 blob<BITS>::blob(const std::vector<unsigned char> &v)
 {
 	assert(v.size() == sizeof(data));
-	memcpy(data, v.data, sizeof(data));
+	memcpy(data, v.data(), sizeof(data));
+}
+
+template <uint32_t BITS>
+blob<BITS>::blob(const unsigned char *arr, const int size)
+{
+	assert(size == sizeof(data));
+	memcpy(data, arr, size);
 }
 
 template <uint32_t BITS>
