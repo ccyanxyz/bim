@@ -11,7 +11,8 @@ uint256 sha256(const std::string &str)
     SHA256_Init(&sha256);
     SHA256_Update(&sha256, str.c_str(), str.size());
     SHA256_Final(hash, &sha256);
-    return uint256(hash, SHA256_DIGEST_LENGTH);
+	std::vector<unsigned char> v_hash(hash, hash + 32);
+    return uint256(v_hash);
 }
 
 uint256 sha256(const unsigned char *arr, const int size)
@@ -21,5 +22,6 @@ uint256 sha256(const unsigned char *arr, const int size)
 	SHA256_Init(&sha256);
 	SHA256_Update(&sha256, arr, size);
 	SHA256_Final(hash, &sha256);
-	return uint256(hash, SHA256_DIGEST_LENGTH);
+	std::vector<unsigned char> v_hash(hash, hash + 32);
+	return uint256(v_hash);
 }

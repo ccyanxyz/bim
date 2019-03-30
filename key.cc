@@ -4,14 +4,15 @@
 #include <ctime>
 #include <cstdlib>
 #include <cassert>
+#include <iostream>
 
-static secp256k1_context *secp256k1_context_sign = nullptr;
+static secp256k1_context *secp256k1_context_sign = secp256k1_context_create(SECP256K1_CONTEXT_SIGN);
 
 void random_bytes(unsigned char *arr, int size)
 {
 	assert(arr);
+	srand(time(nullptr));
 	for(int i = 0; i < size; ++i) {
-		srand(time(nullptr));
 		arr[i] = rand() % 256;
 	}
 }
@@ -50,7 +51,7 @@ CPubKey CKey::get_public_key() const
 	return result;
 }
 
-bool CKey::sign(const uint256 &hash, std::vector<unsigned char> &v_sig, bool grind) const
+bool CKey::sign(const uint256 &hash, std::vector<unsigned char> &v_sig) const
 {
 	if(!valid) {
 		return false;
@@ -61,8 +62,7 @@ bool CKey::sign(const uint256 &hash, std::vector<unsigned char> &v_sig, bool gri
 	secp256k1_ecdsa_signature sig;
 	int ret = secp256k1_ecdsa_sign(secp256k1_context_sign, &sig, hash.begin(), begin(), secp256k1_nonce_function_rfc6979, nullptr);
 	assert(ret);
-	secp256k1_ecdsa_signature_serialize_der(secp256k1_context_sign, v_sig.data(), &siglen, &sig);
-	v_sig.resize(siglen);
+	memcpy(v_sig.data(), sig.data, siglen);
 	return true;
 }
 
@@ -76,7 +76,7 @@ bool CKey::sign_compact(const uint256 &hash, std::vector<unsigned char> &v_sig) 
 	secp256k1_ecdsa_recoverable_signature sig;
 	int ret = secp256k1_ecdsa_sign_recoverable(secp256k1_context_sign, &sig, hash.begin(), begin(), secp256k1_nonce_function_rfc6979, nullptr);
 	assert(ret);
-	secp256k1_ecdsa_recoverable_signature_serialilze_compact(secp256k1_context_sign, &v_sig[1], &rec, &sig);
+	secp256k1_ecdsa_recoverable_signature_serialize_compact(secp256k1_context_sign, &v_sig[1], &rec, &sig);
 	assert(rec != -1);
 	v_sig[0] = 27 + rec + (compressed ? 4 : 0);
 	return true;
@@ -87,9 +87,13 @@ bool CKey::verify_pubkey(const CPubKey &pubkey) const
 	if(pubkey.is_compressed() != compressed) {
 		return false;
 	}
-	std::string str = "public key verification\n";
+	std::string str = "public key verification";
 	uint256 hash = sha256(str);
 	std::vector<unsigned char> sig;
 	sign(hash, sig);
+	std::cout << "msg hash:";
+	std::cout << hash.get_hex() << std::endl;
+	std::cout << "sig:";
+	std::cout << hex_str(sig.begin(), sig.end()) << std::endl;
 	return pubkey.verify(hash, sig);
 }

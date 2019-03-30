@@ -34,8 +34,8 @@ std::string hex_str(const T begin, const T end, bool spaces = false)
 
 	// request space for str
 	str.reserve((end - begin) * 3);
-	for(T it = begin, it != end; ++it) {
-		unsigned char val = (unsigned char *)(*it);
+	for(T it = begin; it != end; ++it) {
+		unsigned char val = (unsigned char)(*it);
 		if(spaces && it != begin) {
 			str.push_back(' ');
 		}
@@ -45,6 +45,7 @@ std::string hex_str(const T begin, const T end, bool spaces = false)
 		// low part
 		str.push_back(hexmap[val & 15]);
 	}
+	return str;
 }
 
 #endif

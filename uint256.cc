@@ -6,24 +6,10 @@
 #include <cctype>
 
 template <uint32_t BITS>
-blob<BITS>::blob(const std::vector<uint8_t> &v)
-{
-	assert(v.size() == sizeof(data));
-	memcpy(data, v.data(), sizeof(data));
-}
-
-template <uint32_t BITS>
 blob<BITS>::blob(const std::vector<unsigned char> &v)
 {
 	assert(v.size() == sizeof(data));
 	memcpy(data, v.data(), sizeof(data));
-}
-
-template <uint32_t BITS>
-blob<BITS>::blob(const unsigned char *arr, const int size)
-{
-	assert(size == sizeof(data));
-	memcpy(data, arr, size);
 }
 
 template <uint32_t BITS>
@@ -72,3 +58,9 @@ std::string blob<BITS>::to_string() const
 {
 	return get_hex();
 }
+
+template blob<256>::blob(const std::vector<unsigned char> &);
+template std::string blob<256>::get_hex() const;
+template std::string blob<256>::to_string() const;
+template void blob<256>::set_hex(const char *);
+template void blob<256>::set_hex(const std::string &);

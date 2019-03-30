@@ -3,10 +3,11 @@
 
 #include "uint256.h"
 #include "pubkey.h"
+#include "strutils.h"
 #include <vector>
 #include <stdexcept>
 
-typedef std::vector<unsigned char, std::alloctor<unsigned char> > CPrivKey;
+typedef std::vector<unsigned char, std::allocator<unsigned char> > CPrivKey;
 
 class CKey {
 public:
@@ -67,6 +68,16 @@ public:
 		return key_data.data() + size();
 	}
 
+	const unsigned char *begin() const
+	{
+		return key_data.data();
+	}
+
+	const unsigned char *end() const
+	{
+		return key_data.data() + size();
+	}
+
 	// check if this private is valid
 	bool is_valid() const
 	{
@@ -74,13 +85,13 @@ public:
 	}
 
 	// generate a new private key
-	void new_key();
+	void new_key(bool compressed_in);
 
 	CPrivKey get_private_key() const;
 	CPubKey get_public_key() const;
 
 	// sign
-	bool sign(const uint256 &hash, std::vector<unsigned char> &v_sig, bool grind = true) const;
+	bool sign(const uint256 &hash, std::vector<unsigned char> &v_sig) const;
 
 	// sign compact
 	bool sign_compact(const uint256 &hash, std::vector<unsigned char> &v_sig) const;

@@ -16,9 +16,7 @@ public:
 	}
 
 	// constructor
-	explicit blob(const std::vector<uint8_t> &v);
 	explicit blob(const std::vector<unsigned char> &v);
-	explicit blob(const unsigned char *arr, const int size = width);
 
 	bool is_null()
 	{

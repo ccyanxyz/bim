@@ -2,7 +2,7 @@
 #include "secp256k1.h"
 #include "secp256k1_recovery.h"
 
-secp256k1_context *secp256k1_context_verify = nullptr;
+static secp256k1_context *secp256k1_context_verify = secp256k1_context_create(SECP256K1_CONTEXT_VERIFY);
 
 bool CPubKey::is_fully_valid() const
 {
@@ -23,12 +23,8 @@ bool CPubKey::verify(const uint256 &hash, const std::vector<unsigned char> &v_si
 		return false;
 	}
 
-	if(!secp256k1_ecdsa_signature_parse_compact(secp256k1_context_verify, &sig, v_sig.data())) {
-		return false;
-	}
+	memcpy(sig.data, v_sig.data(), v_sig.size());
 
-	// normalize
-	secp256k1_ecdsa_signature_normalize(secp256k1_context_verify, &sig, &sig);
 	return secp256k1_ecdsa_verify(secp256k1_context_verify, &sig, hash.begin(), &pub_key);
 }
 
@@ -42,7 +38,7 @@ bool CPubKey::recover_compact(const uint256 &hash, const std::vector<unsigned ch
 
 	secp256k1_pubkey pub_key;
 	secp256k1_ecdsa_recoverable_signature sig;
-	if(!secp256k1_ecdsa_recoverable_signature_parse_compact(secp256k1_context_verify, &sig, &v_sig.data()[1])) {
+	if(!secp256k1_ecdsa_recoverable_signature_parse_compact(secp256k1_context_verify, &sig, &v_sig[1], recid)) {
 		return false;
 	}
 	if(!secp256k1_ecdsa_recover(secp256k1_context_verify, &pub_key, &sig, hash.begin())) {
@@ -69,7 +65,7 @@ bool CPubKey::decompress()
 
 	unsigned char pub[PUBLIC_KEY_SIZE];
 	size_t publen = PUBLIC_KEY_SIZE;
-	secp256k1_ec_pubkey_serialize(secp256k1_context_verify, pub, &publen, SECP256K1_EC_UNCOMPRESSED);
+	secp256k1_ec_pubkey_serialize(secp256k1_context_verify, pub, &publen, &pub_key, SECP256K1_EC_UNCOMPRESSED);
 	set(pub, pub + publen);
 	return true;
 }

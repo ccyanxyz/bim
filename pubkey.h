@@ -7,9 +7,9 @@
 
 class CPubKey {
 public:
-	static constexpr unsigned int PUBLIE_KEY_SIZE = 65;
+	static constexpr unsigned int PUBLIC_KEY_SIZE = 65;
 	static constexpr unsigned int COMPRESSED_PUBLIC_KEY_SIZE = 33;
-	static constexpr unsigned int SIGNATURE_SIZE = 72;
+	static constexpr unsigned int SIGNATURE_SIZE = 64;
 	static constexpr unsigned int COMPACT_SIGNATURE_SIZE = 65;
 
 	static_assert(PUBLIC_KEY_SIZE >= COMPRESSED_PUBLIC_KEY_SIZE,
@@ -21,7 +21,7 @@ private:
 	unsigned int static get_len(unsigned char header)
 	{
 		if (header == 2 || header == 3) {
-			return COMPREESSED_PUBLIC_KEY_SIZE;
+			return COMPRESSED_PUBLIC_KEY_SIZE;
 		}
 
 		if(header == 4 || header == 6 || header == 7) {
@@ -69,7 +69,8 @@ public:
 	}
 
 	// get size
-	unsigned int size() {
+	unsigned int size() const
+	{
 		return get_len(pubkey[0]);
 	}
 
