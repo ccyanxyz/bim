@@ -8,8 +8,8 @@ Current status:
 
 TODO:
 
-* googletest
-* cmake
+* Transaction related logic
+* Mining
 
 
 
