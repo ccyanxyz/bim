@@ -1,3 +1,4 @@
+#include <gtest/gtest.h>
 #include <vector>
 #include <iostream>
 #include "sha256.h"
@@ -7,36 +8,57 @@
 
 using namespace std;
 
-int main()
+TEST(keytest, compact)
 {
-	// get a new private key
 	CKey privkey;
-
 	privkey.new_key(true);
 
-	CPrivKey key = privkey.get_private_key();
+	EXPECT_EQ(privkey.is_valid(), true);
+
 	CPubKey pubkey = privkey.get_public_key();
+	EXPECT_EQ(pubkey.is_valid(), true);
+	EXPECT_EQ(pubkey.is_fully_valid(), true);
+	EXPECT_EQ(pubkey.is_compressed(), true);
 
-	cout << "private key:";
-	cout << hex_str(key.begin(), key.end()) << endl;
-
-	cout << "public key:";
-	cout << hex_str(pubkey.begin(), pubkey.end()) << endl;
-	cout << endl;
-
-	cout << "verify_pubkey:";
-	cout << privkey.verify_pubkey(pubkey) << endl;
+	EXPECT_EQ(privkey.verify_pubkey(pubkey), true);
 
 	string msg = "hello";
 	uint256 hash = sha256(msg);
 	vector<unsigned char> v_sig;
-	bool ret1 = privkey.sign_compact(hash, v_sig);
-	cout << "sign compact ret1:" << ret1 << endl;
-
+	EXPECT_EQ(privkey.sign_compact(hash, v_sig), true);
+	
 	CPubKey pubkey1;
-	bool ret2 = pubkey1.recover_compact(hash, v_sig);
-	cout << "recover compact ret2:" << ret2 << endl;
-	cout << "recovered pubkey:" << hex_str(pubkey1.begin(), pubkey1.end()) << endl;
+	EXPECT_EQ(pubkey1.recover_compact(hash, v_sig), true);
+	EXPECT_EQ(pubkey, pubkey1);
+}
 
-	return 0;
+TEST(keytest, noncompact)
+{
+	CKey privkey;
+	privkey.new_key(false);
+
+	EXPECT_EQ(privkey.is_valid(), true);
+
+	CPubKey pubkey = privkey.get_public_key();
+	EXPECT_EQ(pubkey.is_valid(), true);
+	EXPECT_EQ(pubkey.is_fully_valid(), true);
+	EXPECT_EQ(pubkey.is_compressed(), false);
+
+	EXPECT_EQ(privkey.verify_pubkey(pubkey), true);
+
+	string msg = "hello";
+	uint256 hash = sha256(msg);
+	vector<unsigned char> v_sig;
+	EXPECT_EQ(privkey.sign_compact(hash, v_sig), true);
+	
+	CPubKey pubkey1;
+	EXPECT_EQ(pubkey1.recover_compact(hash, v_sig), true);
+	EXPECT_EQ(pubkey, pubkey1);
+}
+
+int main(int argc, char *argv[])
+{	
+	::testing::InitGoogleTest(&argc, argv);
+
+	return RUN_ALL_TESTS();
 }
